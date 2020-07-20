@@ -9,20 +9,35 @@ class UserDonation
     validates :nickname, format: { with: /\A[a-z0-9]+\z/i, message: "は半角英数で入力してください。"}
     validates :postal_code, format: {with: /\A[0-9]{3}-[0-9]{4}\z/, messsgge: "は「-」も入力してください"}
     validates :prefecture
-
     # 「寄付金」に関するバリデーション
     validates :price, format: {with: /\A[0-9]+\z/, message: "は半角数字で入力してください"}
   end
 
   def save
+    # return false if self.invalid?
     # ユーザーの情報を保存し、「user」という変数に入れている
-    user = User.create(name: name, name_reading: name_reading, nickname: nickname)
 
-    # 住所の情報を保存
-    Address.create(postal_code: postal_code, prefecture: prefecture, city: city, house_number: house_number, 
-    building_name: building_name, user_id: user.id)
+    ActiveRecord::Base.transaction do
+
+      user = User.create!(name: name, name_reading: name_reading, nickname: nickname)
+      address = Address.create!(postal_code: postal_code, prefecture: prefecture, city: city, house_number: house_number, building_name: building_name, user_id: user.id)
+      donation = Donation.create!(price: price, user_id: user.id)
+        true
+      rescue => e
+        
+        false
+    end
+    
+    # user = User.create!(name: name, name_reading: name_reading, nickname: nickname)
+    # address = Address.create!(postal_code: postal_code, prefecture: prefecture, city: city, house_number: house_number, building_name: building_name, user_id: user.id)
+    # donation = Donation.create!(price: price, user_id: user.id)
+  # 住所の情報を保存
 
     # 寄付金の情報を保存
-    Donation.create(price: price, user_id: user.id)
+    # if user.persisted? && address.persisted? && donation.persisted?
+    #   return true
+    # else
+    #   return false
+    # end
   end
 end

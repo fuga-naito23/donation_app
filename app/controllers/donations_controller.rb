@@ -7,6 +7,7 @@ class DonationsController < ApplicationController
  
   def create
     @donation = UserDonation.new(donation_params)   #「UserDonation」に編集
+    binding.pry
     if @donation.valid?
       @donation.save  # バリデーションをクリアした時
       return redirect_to root_path
